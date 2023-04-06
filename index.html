@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>保全薪資結構試算</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+      integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css"
+    />
+
+    <link
+      rel="stylesheet"
+      href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css"
+    />
+    <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-ui-monthpicker@1.0.3/jquery.ui.monthpicker.min.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/decimal.js/9.0.0/decimal.min.js"
+      integrity="sha512-zPQm8HS4Phjo9pUbbk+HPH3rSWu5H03NFvBpPf6D9EU2xasj0ZxhYAc/lvv/HVDWMSE1Autj19i6nZOfiVQbFQ=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    ></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
+    <style>
+      label {
+        display: inline-block;
+        width: 100px;
+      }
+      input {
+        border: none;
+        border-bottom: 1px solid #000;
+      }
+      form {
+        width: 100%;
+      }
+      form > div {
+        margin: 10px 0;
+      }
+      form .unit {
+        margin-left: 3px;
+      }
+      form button[type="submit"] {
+        display: block;
+        width: 80px;
+        margin: 5px auto;
+        padding: 5px 10px;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+      }
+      form .month .mdi-calendar-blank-outline {
+        font-size: 22px;
+        cursor: pointer;
+        position: relative;
+        top: 5px;
+      }
+      h2 {
+        text-align: center;
+        margin: 25px 0;
+        font-size: 26px;
+      }
+      .vertical-line {
+        margin-top: 15px;
+        border-right: 1px solid #000;
+      }
+      .result-block .result-title {
+        display: inline-block;
+        width: 7.5rem;
+        text-align: right;
+        text-align-last: justify;
+        font-size: 1.2rem;
+      }
+      .result-block .result-value {
+        display: inline-block;
+        width: 7rem;
+        text-align: right;
+        font-size: 1.2rem;
+      }
+      .result-block .horizontal-line {
+        margin: 10px 30px;
+        border-bottom: 1px solid #000;
+      }
+      .result-block p {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+      }
+      .result-block {
+        display: grid;
+        grid-template-rows: max-content 1fr;
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <div class="container">
+        <div class="row">
+          <div class="col-4">
+            <h2>條件設定</h2>
+            <form @submit.prevent="salaryCalc">
+              <div>
+                <label>年度基本薪資</label>
+                <input type="text" v-model="condition.minimumWage" />
+              </div>
+              <div>
+                <label>國定假日</label>
+                <input type="text" v-model="condition.holiday" />
+                <span class="unit">日</span>
+              </div>
+              <div>
+                <label>每日工作時數</label>
+                <input type="text" v-model="condition.workHours" />
+                <span class="unit">H</span>
+              </div>
+              <div>
+                <label>上班休息時間</label>
+                <input type="text" v-model="condition.breakTime" />
+                <span class="unit">H</span>
+              </div>
+              <div>
+                <label>每月上班天數</label>
+                <input type="text" v-model="condition.workingDays" />
+                <span class="unit">日</span>
+              </div>
+              <button type="submit">試算</button>
+            </form>
+          </div>
+          <div class="vertical-line"></div>
+          <div class="col-5">
+            <div class="result-block">
+              <h2>試算結果</h2>
+              <div>
+                <p>
+                  <span class="result-title">最低基本工資</span>:
+                  <span class="result-value"
+                    >{{ result.minimumWage?.toString() }}</span
+                  >
+                </p>
+                <p>
+                  <span class="result-title">延長工時工資</span>:
+                  <span class="result-value"
+                    >{{result.overtimePay?.toString()}}</span
+                  >
+                </p>
+                <div class="horizontal-line"></div>
+                <p>
+                  <span class="result-title">合計</span>:
+                  <span class="result-value"
+                    >{{result.totalSalary?.toString()}}</span
+                  >
+                </p>
+                <p>
+                  <span class="result-title">時薪</span>:
+                  <span class="result-value">
+                    {{result.hourlyWage?.toString()}}
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script type="module" src="./index.js"></script>
+    <script type="module">
+      import vm from "./index.js";
+      import { month_name_list } from "./constant.js";
+      $(function () {
+        $.monthpicker.regional["zh-TW"] = {
+          closeText: "關閉",
+          prevText: "&#x3c;上個月",
+          nextText: "下個月&#x3e;",
+          currentText: "今天",
+          monthNames: month_name_list,
+          monthNamesShort: month_name_list,
+          dayNames: [
+            "星期日",
+            "星期一",
+            "星期二",
+            "星期三",
+            "星期四",
+            "星期五",
+            "星期六"
+          ],
+          dayNamesShort: ["日", "一", "二", "三", "四", "五", "六"],
+          dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"],
+          weekHeader: "周",
+          dateFormat: "MM yy",
+          firstDay: 1,
+          isRTL: false,
+          showMonthAfterYear: true,
+          yearSuffix: "年"
+        };
+
+        $.monthpicker.setDefaults($.monthpicker.regional["zh-TW"]);
+
+        $("#datepicker").monthpicker({
+          changeMonth: true,
+          changeYear: false,
+          showButtonPanel: true,
+          dateFormat: "MM",
+          onSelect: function (text, inst) {
+            vm.$set(vm.condition, "monthName", text);
+          }
+        });
+        $('[data-toggle="tooltip"]').tooltip();
+      });
+    </script>
+  </body>
+</html>
