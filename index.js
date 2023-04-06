@@ -8,11 +8,11 @@ export default new Vue({
   data: {
     condition: {
       monthName: "",
-      minimumWage: "25250",
-      workHours: "12",
-      breakTime: "1",
-      workingDays: "24",
-      holiday: "1"
+      minimumWage: "",
+      workHours: "",
+      breakTime: "",
+      workingDays: "",
+      holiday: ""
     },
     result: {
       minimumWage: null,
