@@ -18,7 +18,9 @@ export default new Vue({
       minimumWage: null,
       overtimePay: null,
       totalSalary: null,
-      hourlyWage: null
+      hourlyWage: null,
+      overtimePay_NoFullTimeOvertime: null,
+      fullTimeOvertimePay: null
     }
   },
   computed: {
@@ -49,19 +51,32 @@ export default new Vue({
 
       // 正常工時時數
       let normalMonthWorkHours = normalWorkHours * (workingDays + holiday);
-      normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
+      
 
       // 加班工時時數
-      const overtimeHourPerDay = workHours - 10; //每日加班時數
-      const fullTimeOvertimeDays = workingDays > 23 ? workingDays - 23 : 0; //全日加班天數
+      const overtimeHourPerDay = workHours > 10 ? workHours - 10 : 0; //每日加班時數
+  
+      // 全日加班時數
+      // 假設每天沒加班
+      let fullTimeOvertimeHours = normalMonthWorkHours > 240 ? normalMonthWorkHours - 240 : 0;
+      let fullTimeOvertimeDays = Math.floor(fullTimeOvertimeHours / workHours);
 
+      // 假如每天有加班
+      // 全日加班 = 工時*全日加班天數
+      if (overtimeHourPerDay > 0)  {
+        fullTimeOvertimeDays = ((normalMonthWorkHours - 240) / 10)
+        fullTimeOvertimeHours = workHours * fullTimeOvertimeDays
+      }
+
+      // 超過240小時以240計
+      normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
       //最低基本工資
       const resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
         .times(this.hourlyWage)
         .add(minimumWage);
 
       // 延長工時工資(不含全日加班)
-      const totalOvertimeHour = workingDays > 23 ? 23 * overtimeHourPerDay : overtimeHourPerDay * workingDays;
+      const totalOvertimeHour = fullTimeOvertimeHours > 0 ? (workingDays - fullTimeOvertimeDays) * overtimeHourPerDay : overtimeHourPerDay * workingDays;
       const overtimePay_NoFullTimeOvertime = new Decimal(totalOvertimeHour)
         .times(this.hourlyWage)
         .times(4)
@@ -70,29 +85,53 @@ export default new Vue({
       // 全日加班
       let fullTimeOvertimePay = new Decimal(0);
 
-      if (fullTimeOvertimeDays > 0) {
-        fullTimeOvertimePay = this.hourlyWage
-          .times(4)
-          .div(3)
-          .times(2)
-          .add(fullTimeOvertimePay);
-        
-        fullTimeOvertimePay = this.hourlyWage
-          .times(5)
-          .div(3)
-          .times(workHours - 2)
-          .add(fullTimeOvertimePay);
-
-        fullTimeOvertimePay = fullTimeOvertimePay.mul(fullTimeOvertimeDays);
+      // 假設前一天有加班
+      if (fullTimeOvertimeHours % workHours !== 0) {
+        const first = fullTimeOvertimeHours % workHours;
+        if (first > 2) {
+          fullTimeOvertimePay = this.hourlyWage
+            .times(4)
+            .div(3)
+            .times(2)
+            .add(fullTimeOvertimePay);
+          fullTimeOvertimePay = this.hourlyWage
+            .times(5)
+            .div(3)
+            .times(first - 2)
+            .add(fullTimeOvertimePay);
+        } else {
+          fullTimeOvertimePay = this.hourlyWage
+            .times(4)
+            .div(3)
+            .times(first)
+            .add(fullTimeOvertimePay);
+        }
       }
 
 
-      console.log(fullTimeOvertimePay.toString());
+      if (fullTimeOvertimeDays > 0) {
+        let _fullTimeOvertimePay = new Decimal(0)
 
+        _fullTimeOvertimePay = this.hourlyWage
+          .times(4)
+          .div(3)
+          .times(2)
+          .add(_fullTimeOvertimePay);
+        
+        _fullTimeOvertimePay = this.hourlyWage
+          .times(5)
+          .div(3)
+          .times(workHours - 2)
+          .add(_fullTimeOvertimePay);
+
+        fullTimeOvertimePay = _fullTimeOvertimePay.mul(fullTimeOvertimeDays).add(fullTimeOvertimePay);
+      }
 
 
       // 結果
       this.salaryCalcResult.minimumWage = resultMinimumWage.ceil();
+      this.salaryCalcResult.overtimePay_NoFullTimeOvertime = overtimePay_NoFullTimeOvertime.ceil();
+      this.salaryCalcResult.fullTimeOvertimePay = fullTimeOvertimePay.ceil();
       this.salaryCalcResult.overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
       this.salaryCalcResult.totalSalary = this.salaryCalcResult.minimumWage.add(this.salaryCalcResult.overtimePay);
       this.salaryCalcResult.hourlyWage = this.salaryCalcResult.totalSalary
@@ -108,7 +147,9 @@ export default new Vue({
         minimumWage: null,
         overtimePay: null,
         totalSalary: null,
-        hourlyWage: null
+        hourlyWage: null,
+        overtimePay_NoFullTimeOvertime: null,
+        fullTimeOvertimePay: null
       };
     },
     saveMinimumWage() {
