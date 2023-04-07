@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-TW">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -89,9 +89,15 @@
                   >
                 </p>
                 <p>
-                  <span class="result-title">延長工時工資</span>:
+                  <span class="result-title">加班工時工資</span>:
                   <span class="result-value"
-                    >{{salaryCalcResult.overtimePay?.toString()}}</span
+                    >{{salaryCalcResult.overtimePay_NoFullTimeOvertime?.toString()}}</span
+                  >
+                </p>
+                <p>
+                  <span class="result-title">全日加班工資</span>:
+                  <span class="result-value"
+                    >{{salaryCalcResult.fullTimeOvertimePay?.toString()}}</span
                   >
                 </p>
                 <div class="horizontal-line"></div>
