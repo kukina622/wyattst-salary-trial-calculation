@@ -1,0 +1,69 @@
+label {
+  display: inline-block;
+  width: 100px;
+}
+input {
+  border: none;
+  border-bottom: 1px solid #000;
+}
+form {
+  width: 100%;
+}
+form > div {
+  margin: 10px 0;
+}
+form .unit {
+  margin-left: 3px;
+}
+form button[type="submit"] {
+  display: block;
+  width: 80px;
+  margin: 5px auto;
+  padding: 5px 10px;
+  background-color: #000;
+  color: #fff;
+  border: none;
+  border-radius: 5px;
+}
+form .month .mdi-calendar-blank-outline {
+  font-size: 22px;
+  cursor: pointer;
+  position: relative;
+  top: 5px;
+}
+h2 {
+  text-align: center;
+  margin: 25px 0;
+  font-size: 26px;
+}
+.vertical-line {
+  margin-top: 15px;
+  border-right: 1px solid #000;
+}
+.result-block .result-title {
+  display: inline-block;
+  width: 7.5rem;
+  text-align: right;
+  text-align-last: justify;
+  font-size: 1.2rem;
+}
+.result-block .result-value {
+  display: inline-block;
+  width: 7rem;
+  text-align: right;
+  font-size: 1.2rem;
+}
+.result-block .horizontal-line {
+  margin: 10px 30px;
+  border-bottom: 1px solid #000;
+}
+.result-block p {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+}
+.result-block {
+  display: grid;
+  grid-template-rows: max-content 1fr;
+  height: 100%;
+}
