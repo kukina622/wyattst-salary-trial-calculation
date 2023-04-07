@@ -6,7 +6,7 @@ import {
 export default new Vue({
   el: "#app",
   data: {
-    condition: {
+    salaryCalcCondition: {
       monthName: "",
       minimumWage: "",
       workHours: "",
@@ -14,7 +14,7 @@ export default new Vue({
       workingDays: "",
       containHoliday: true
     },
-    result: {
+    salaryCalcResult: {
       minimumWage: null,
       overtimePay: null,
       totalSalary: null,
@@ -23,27 +23,27 @@ export default new Vue({
   },
   computed: {
     hourlyWage() {
-      return new Decimal(this.condition.minimumWage)
+      return new Decimal(this.salaryCalcCondition.minimumWage)
         .div(8)
         .div(30);
     },
     month() {
-      return month_name_list.indexOf(this.condition.monthName) + 1;
+      return month_name_list.indexOf(this.salaryCalcCondition.monthName) + 1;
     },
     minimumWage() {
-      return this.condition.minimumWage.replace(",", "");
+      return this.salaryCalcCondition.minimumWage.replace(",", "");
     },
     holiday() {
-      return this.condition.containHoliday ? 1 : 0
+      return this.salaryCalcCondition.containHoliday ? 1 : 0
     }
   },
   methods: {
     salaryCalc() {
       this.clearResult();
       const minimumWage = this.minimumWage;
-      const workingDays = parseInt(this.condition.workingDays) ?? 0;
+      const workingDays = parseInt(this.salaryCalcCondition.workingDays) ?? 0;
       const holiday = this.holiday
-      const workHours = parseInt(this.condition.workHours) ?? 0;
+      const workHours = parseInt(this.salaryCalcCondition.workHours) ?? 0;
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
@@ -92,10 +92,10 @@ export default new Vue({
 
 
       // 結果
-      this.result.minimumWage = resultMinimumWage.ceil();
-      this.result.overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
-      this.result.totalSalary = this.result.minimumWage.add(this.result.overtimePay);
-      this.result.hourlyWage = this.result.totalSalary
+      this.salaryCalcResult.minimumWage = resultMinimumWage.ceil();
+      this.salaryCalcResult.overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
+      this.salaryCalcResult.totalSalary = this.salaryCalcResult.minimumWage.add(this.salaryCalcResult.overtimePay);
+      this.salaryCalcResult.hourlyWage = this.salaryCalcResult.totalSalary
         .div(workingDays)
         .div(workHours)
         .toDecimalPlaces(3);
@@ -104,7 +104,7 @@ export default new Vue({
       this.saveMinimumWage()
     },
     clearResult() {
-      this.result = {
+      this.salaryCalcResult = {
         minimumWage: null,
         overtimePay: null,
         totalSalary: null,
@@ -119,6 +119,6 @@ export default new Vue({
     }
   },
   mounted(){
-    this.condition.minimumWage = this.getMinimumWage()
+    this.salaryCalcCondition.minimumWage = this.getMinimumWage()
   }
 });

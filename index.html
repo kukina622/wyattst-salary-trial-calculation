@@ -53,25 +53,25 @@
             <form @submit.prevent="salaryCalc">
               <div>
                 <label>年度基本薪資</label>
-                <input type="text" v-model="condition.minimumWage" />
+                <input type="text" v-model="salaryCalcCondition.minimumWage" />
               </div>
               <div>
                 <label>每日工作時數</label>
-                <input type="text" v-model="condition.workHours" />
+                <input type="text" v-model="salaryCalcCondition.workHours" />
                 <span class="unit">H</span>
               </div>
               <div>
                 <label>上班休息時間</label>
-                <input type="text" v-model="condition.breakTime" />
+                <input type="text" v-model="salaryCalcCondition.breakTime" />
                 <span class="unit">H</span>
               </div>
               <div>
                 <label>每月上班天數</label>
-                <input type="text" v-model="condition.workingDays" />
+                <input type="text" v-model="salaryCalcCondition.workingDays" />
                 <span class="unit">日</span>
               </div>
               <div>
-                <input id="contain-holiday" type="checkbox" v-model="condition.isHoliday" />
+                <input id="contain-holiday" type="checkbox" v-model="salaryCalcCondition.containHoliday" />
                 <label for="contain-holiday">1天國定假日</label>
               </div>
               <button type="submit">試算</button>
@@ -85,26 +85,26 @@
                 <p>
                   <span class="result-title">最低基本工資</span>:
                   <span class="result-value"
-                    >{{ result.minimumWage?.toString() }}</span
+                    >{{ salaryCalcResult.minimumWage?.toString() }}</span
                   >
                 </p>
                 <p>
                   <span class="result-title">延長工時工資</span>:
                   <span class="result-value"
-                    >{{result.overtimePay?.toString()}}</span
+                    >{{salaryCalcResult.overtimePay?.toString()}}</span
                   >
                 </p>
                 <div class="horizontal-line"></div>
                 <p>
                   <span class="result-title">合計</span>:
                   <span class="result-value"
-                    >{{result.totalSalary?.toString()}}</span
+                    >{{salaryCalcResult.totalSalary?.toString()}}</span
                   >
                 </p>
                 <p>
                   <span class="result-title">時薪</span>:
                   <span class="result-value">
-                    {{result.hourlyWage?.toString()}}
+                    {{salaryCalcResult.hourlyWage?.toString()}}
                   </span>
                 </p>
               </div>
