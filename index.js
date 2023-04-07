@@ -40,10 +40,10 @@ export default new Vue({
   methods: {
     salaryCalc() {
       this.clearResult();
-      const minimumWage = this.minimumWage;
-      const workingDays = parseInt(this.salaryCalcCondition.workingDays) ?? 0;
+      const minimumWage = parseInt(this.minimumWage) || 0;
       const holiday = this.holiday
-      const workHours = parseInt(this.salaryCalcCondition.workHours) ?? 0;
+      const workingDays = parseInt(this.salaryCalcCondition.workingDays) || 0;
+      const workHours = parseInt(this.salaryCalcCondition.workHours) || 0;
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
