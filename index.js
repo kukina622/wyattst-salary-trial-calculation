@@ -12,7 +12,7 @@ export default new Vue({
       workHours: "",
       breakTime: "",
       workingDays: "",
-      holiday: ""
+      containHoliday: true
     },
     result: {
       minimumWage: null,
@@ -30,14 +30,11 @@ export default new Vue({
     month() {
       return month_name_list.indexOf(this.condition.monthName) + 1;
     },
-    totalWorkDays() {
-      const workingDays = parseInt(this.condition.workingDays) ?? 0;
-      const holiday = parseInt(this.condition.holiday) ?? 0;
-
-      return workingDays + holiday;
-    },
     minimumWage() {
       return this.condition.minimumWage.replace(",", "");
+    },
+    holiday() {
+      return this.condition.containHoliday ? 1 : 0
     }
   },
   methods: {
@@ -45,7 +42,7 @@ export default new Vue({
       this.clearResult();
       const minimumWage = this.minimumWage;
       const workingDays = parseInt(this.condition.workingDays) ?? 0;
-      const holiday = parseInt(this.condition.holiday) ?? 0;
+      const holiday = this.holiday
       const workHours = parseInt(this.condition.workHours) ?? 0;
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;

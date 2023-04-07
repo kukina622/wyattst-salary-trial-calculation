@@ -46,7 +46,7 @@
   </head>
   <body>
     <div id="app">
-      <div class="container">
+      <div class="container salary-calc">
         <div class="row">
           <div class="col-4">
             <h2>條件設定</h2>
@@ -54,11 +54,6 @@
               <div>
                 <label>年度基本薪資</label>
                 <input type="text" v-model="condition.minimumWage" />
-              </div>
-              <div>
-                <label>國定假日</label>
-                <input type="text" v-model="condition.holiday" />
-                <span class="unit">日</span>
               </div>
               <div>
                 <label>每日工作時數</label>
@@ -74,6 +69,10 @@
                 <label>每月上班天數</label>
                 <input type="text" v-model="condition.workingDays" />
                 <span class="unit">日</span>
+              </div>
+              <div>
+                <input id="contain-holiday" type="checkbox" v-model="condition.isHoliday" />
+                <label for="contain-holiday">1天國定假日</label>
               </div>
               <button type="submit">試算</button>
             </form>
