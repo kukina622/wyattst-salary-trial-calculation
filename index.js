@@ -42,7 +42,7 @@ export default new Vue({
       return this.computedCondition.containHoliday ? 1 : 0;
     },
     computedCondition() {
-      switch (page) {
+      switch (this.page) {
         case 1:
           return this.salaryCalcCondition;
         case 2:
@@ -60,7 +60,10 @@ export default new Vue({
       const minimumWage = parseInt(this.minimumWage) || 0;
       const holiday = this.holiday;
       const workingDays = parseInt(this.salaryCalcCondition.workingDays) || 0;
-      const workHours = parseInt(this.salaryCalcCondition.workHours) || 0;
+      const totalWorkHours = parseInt(this.salaryCalcCondition.workHours) || 0;
+      const breakTime = parseInt(this.salaryCalcCondition.breakTime) || 0;
+
+      const workHours = totalWorkHours - breakTime
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
@@ -149,7 +152,7 @@ export default new Vue({
       this.salaryCalcResult.totalSalary = this.salaryCalcResult.minimumWage.add(
         this.salaryCalcResult.overtimePay
       );
-      
+
       this.salaryCalcResult.hourlyWage = this.salaryCalcResult.totalSalary
         .div(workingDays)
         .div(workHours)
@@ -174,6 +177,9 @@ export default new Vue({
     getMinimumWage() {
       return localStorage.getItem("minimumWage") ?? "";
     },
+    breakTimeCalc(){
+
+    }
   },
   mounted() {
     this.salaryCalcCondition.minimumWage = this.getMinimumWage();
