@@ -118,7 +118,7 @@
       <div class="row justify-content-center">
         <div class="col-4">
           <h2>條件設定</h2>
-          <form @submit.prevent="salaryCalc">
+          <form @submit.prevent="onBreakTimeCalcSubmit">
             <div>
               <label>年度基本薪資</label>
               <input type="text" v-model="breakTimeCalcCondition.govtMinWage" />

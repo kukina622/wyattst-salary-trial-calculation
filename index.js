@@ -78,6 +78,27 @@ export default new Vue({
 
       this.saveGovtMinWage();
     },
+    onBreakTimeCalcSubmit() {
+      const govtMinWage = parseInt(this.govtMinWage) || 0;
+      const holiday = this.holiday;
+      const workingDays = parseInt(this.breakTimeCalcCondition.workingDays) || 0;
+      const totalWorkHours = parseInt(this.breakTimeCalcCondition.workHours) || 0;
+      const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
+
+      for (let breakTime = 0; breakTime < totalWorkHours; breakTime++) {
+        const { totalSalary } = this.salaryCalc({
+          govtMinWage,
+          holiday,
+          workingDays,
+          totalWorkHours,
+          breakTime,
+        });
+        if (totalSalary <= expectSalary) {
+          this.breakTimeCalcResult.dailyBreakTime = breakTime;
+          break;
+        }
+      }
+    },
     /**
      * @returns {Object}
      * @property {Decimal} minimumWage 最低基本工資
