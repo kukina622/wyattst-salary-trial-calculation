@@ -6,6 +6,7 @@ import {
 export default new Vue({
   el: "#app",
   data: {
+    page: 1,
     salaryCalcCondition: {
       monthName: "",
       minimumWage: "",
@@ -21,7 +22,7 @@ export default new Vue({
       hourlyWage: null,
       overtimePay_NoFullTimeOvertime: null,
       fullTimeOvertimePay: null
-    }
+    },
   },
   computed: {
     hourlyWage() {
