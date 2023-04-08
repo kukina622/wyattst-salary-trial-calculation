@@ -143,7 +143,51 @@
         </div>
       </section>
       <section class="container break-time-calc" v-if="page === 2">
-
+        <div class="row justify-content-center">
+          <div class="col-4">
+            <h2>條件設定</h2>
+            <form @submit.prevent="salaryCalc">
+              <div>
+                <label>年度基本薪資</label>
+                <input type="text" v-model="breakTimeCalcCondition.minimumWage" />
+              </div>
+              <div>
+                <label>每日工作時數</label>
+                <input type="text" v-model="breakTimeCalcCondition.workHours" />
+                <span class="unit">H</span>
+              </div>
+              <div>
+                <label>每月上班天數</label>
+                <input type="text" v-model="breakTimeCalcCondition.workingDays" />
+                <span class="unit">日</span>
+              </div>
+              <div>
+                <label>期望薪資</label>
+                <input type="text" v-model="breakTimeCalcCondition.expectSalary" />
+              </div>
+              <div>
+                <input id="contain-holiday" type="checkbox" v-model="breakTimeCalcCondition.containHoliday" />
+                <label for="contain-holiday">1天國定假日</label>
+              </div>
+              <button type="submit">試算</button>
+            </form>
+          </div>
+          <div class="vertical-line"></div>
+          <div class="col">
+            <div class="result-block">
+              <h2>試算結果</h2>
+              <div>
+                <p>
+                  <span class="result-title">每日需要休息</span>:
+                  <span class="result-value">
+                    {{ breakTimeCalcResult.dailyBreakTime }}
+                    小時
+                  </span>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
     <script type="module" src="./index.js"></script>

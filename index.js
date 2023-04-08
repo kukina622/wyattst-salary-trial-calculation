@@ -23,6 +23,16 @@ export default new Vue({
       overtimePay_NoFullTimeOvertime: null,
       fullTimeOvertimePay: null
     },
+    breakTimeCalcCondition:{
+      minimumWage: "",
+      workHours:"",
+      workingDays:"",
+      expectSalary:"",
+      containHoliday: true
+    },
+    breakTimeCalcResult:{
+      dailyBreakTime:""
+    }
   },
   computed: {
     hourlyWage() {
@@ -30,17 +40,26 @@ export default new Vue({
         .div(8)
         .div(30);
     },
-    month() {
-      return month_name_list.indexOf(this.salaryCalcCondition.monthName) + 1;
-    },
     minimumWage() {
-      return this.salaryCalcCondition.minimumWage.replace(",", "");
+      return this.computedCondition.minimumWage?.replace(",", "");
     },
     holiday() {
-      return this.salaryCalcCondition.containHoliday ? 1 : 0
+      return this.computedCondition.containHoliday ? 1 : 0
+    },
+    computedCondition(){
+      switch (page) {
+        case 1:
+          return this.salaryCalcCondition
+        case 2:
+          return this.breakTimeCalcCondition
+      }
     }
   },
   methods: {
+    /**
+     * 依據salaryCalcCondition計算薪資
+     * 完成後將結果存入 salaryCalcResult
+     */
     salaryCalc() {
       this.clearResult();
       const minimumWage = parseInt(this.minimumWage) || 0;
