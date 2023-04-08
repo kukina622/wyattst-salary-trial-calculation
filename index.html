@@ -54,10 +54,10 @@
       <div class="row justify-content-center">
         <div class="col-4">
           <h2>條件設定</h2>
-          <form @submit.prevent="salaryCalc">
+          <form @submit.prevent="onsalaryCalcSubmit">
             <div>
               <label>年度基本薪資</label>
-              <input type="text" v-model="salaryCalcCondition.minimumWage" />
+              <input type="text" v-model="salaryCalcCondition.govtMinWage" />
             </div>
             <div>
               <label>每日工作時數</label>
@@ -121,7 +121,7 @@
           <form @submit.prevent="salaryCalc">
             <div>
               <label>年度基本薪資</label>
-              <input type="text" v-model="breakTimeCalcCondition.minimumWage" />
+              <input type="text" v-model="breakTimeCalcCondition.govtMinWage" />
             </div>
             <div>
               <label>每日工作時數</label>

@@ -6,7 +6,7 @@ export default new Vue({
     page: 1,
     salaryCalcCondition: {
       monthName: "",
-      minimumWage: "",
+      govtMinWage: "",
       workHours: "",
       breakTime: "",
       workingDays: "",
@@ -21,7 +21,7 @@ export default new Vue({
       fullTimeOvertimePay: null,
     },
     breakTimeCalcCondition: {
-      minimumWage: "",
+      govtMinWage: "",
       workHours: "",
       workingDays: "",
       expectSalary: "",
@@ -33,10 +33,10 @@ export default new Vue({
   },
   computed: {
     hourlyWage() {
-      return new Decimal(this.minimumWage).div(8).div(30);
+      return new Decimal(this.govtMinWage).div(8).div(30);
     },
-    minimumWage() {
-      return this.computedCondition.minimumWage?.replace(",", "");
+    govtMinWage() {
+      return this.computedCondition.govtMinWage?.replace(",", "") || 0;
     },
     holiday() {
       return this.computedCondition.containHoliday ? 1 : 0;
@@ -51,19 +51,44 @@ export default new Vue({
     },
   },
   methods: {
-    /**
-     * 依據salaryCalcCondition計算薪資
-     * 完成後將結果存入 salaryCalcResult
-     */
-    salaryCalc() {
-      this.clearResult();
-      const minimumWage = parseInt(this.minimumWage) || 0;
+    onsalaryCalcSubmit() {
+      const govtMinWage = parseInt(this.govtMinWage) || 0;
       const holiday = this.holiday;
       const workingDays = parseInt(this.salaryCalcCondition.workingDays) || 0;
       const totalWorkHours = parseInt(this.salaryCalcCondition.workHours) || 0;
       const breakTime = parseInt(this.salaryCalcCondition.breakTime) || 0;
 
-      const workHours = totalWorkHours - breakTime
+      const {
+        minimumWage,
+        overtimePay_NoFullTimeOvertime,
+        fullTimeOvertimePay,
+        overtimePay,
+        totalSalary,
+        hourlyWage,
+      } = this.salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime });
+
+      this.salaryCalcResult = {
+        minimumWage,
+        overtimePay,
+        totalSalary,
+        hourlyWage,
+        overtimePay_NoFullTimeOvertime,
+        fullTimeOvertimePay,
+      };
+
+      this.saveGovtMinWage();
+    },
+    /**
+     * @returns {Object}
+     * @property {Decimal} minimumWage 最低基本工資
+     * @property {Decimal} overtimePay_NoFullTimeOvertime 延長工時工資(不含全日加班)
+     * @property {Decimal} fullTimeOvertimePay 全日加班工資
+     * @property {Decimal} overtimePay 總延長工時工資
+     * @property {Decimal} totalSalary 總工資
+     * @property {Decimal} hourlyWage 時薪
+     */
+    salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime }) {
+      const workHours = totalWorkHours - breakTime;
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
@@ -90,14 +115,14 @@ export default new Vue({
       //最低基本工資
       const resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
         .times(this.hourlyWage)
-        .add(minimumWage);
+        .add(govtMinWage);
 
       // 延長工時工資(不含全日加班)
       const totalOvertimeHour =
         fullTimeOvertimeHours > 0
           ? (workingDays - fullTimeOvertimeDays) * overtimeHourPerDay
           : overtimeHourPerDay * workingDays;
-      
+
       const overtimePay_NoFullTimeOvertime = new Decimal(totalOvertimeHour)
         .times(this.hourlyWage)
         .times(4)
@@ -142,46 +167,29 @@ export default new Vue({
       }
 
       // 結果
-      this.salaryCalcResult.minimumWage = resultMinimumWage.ceil();
-      this.salaryCalcResult.overtimePay_NoFullTimeOvertime = overtimePay_NoFullTimeOvertime.ceil();
-      this.salaryCalcResult.fullTimeOvertimePay = fullTimeOvertimePay.ceil();
-      this.salaryCalcResult.overtimePay = overtimePay_NoFullTimeOvertime
-        .add(fullTimeOvertimePay)
-        .ceil();
+      const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
+      const totalSalary = resultMinimumWage.add(overtimePay).ceil();
+      const resultHourlyWage = totalSalary.div(workingDays).div(workHours).toDecimalPlaces(3);
 
-      this.salaryCalcResult.totalSalary = this.salaryCalcResult.minimumWage.add(
-        this.salaryCalcResult.overtimePay
-      );
-
-      this.salaryCalcResult.hourlyWage = this.salaryCalcResult.totalSalary
-        .div(workingDays)
-        .div(workHours)
-        .toDecimalPlaces(3);
-
-      // 紀錄
-      this.saveMinimumWage();
-    },
-    clearResult() {
-      this.salaryCalcResult = {
-        minimumWage: null,
-        overtimePay: null,
-        totalSalary: null,
-        hourlyWage: null,
-        overtimePay_NoFullTimeOvertime: null,
-        fullTimeOvertimePay: null,
+      return {
+        minimumWage: resultMinimumWage.ceil(),
+        overtimePay_NoFullTimeOvertime: overtimePay_NoFullTimeOvertime.ceil(),
+        fullTimeOvertimePay: fullTimeOvertimePay.ceil(),
+        hourlyWage: resultHourlyWage,
+        overtimePay,
+        totalSalary,
       };
     },
-    saveMinimumWage() {
-      localStorage.setItem("minimumWage", this.minimumWage);
+    saveGovtMinWage() {
+      localStorage.setItem("govtMinWage", this.govtMinWage);
     },
-    getMinimumWage() {
-      return localStorage.getItem("minimumWage") ?? "";
-    },
-    breakTimeCalc(){
-
+    getGovtMinWage() {
+      return localStorage.getItem("govtMinWage") ?? "";
     }
   },
   mounted() {
-    this.salaryCalcCondition.minimumWage = this.getMinimumWage();
+    const govtMinWage = this.getGovtMinWage();
+    this.salaryCalcCondition.govtMinWage = govtMinWage;
+    this.breakTimeCalcCondition.govtMinWage = govtMinWage;
   },
 });
