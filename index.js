@@ -25,7 +25,7 @@ export default new Vue({
   },
   computed: {
     hourlyWage() {
-      return new Decimal(this.salaryCalcCondition.minimumWage)
+      return new Decimal(this.minimumWage)
         .div(8)
         .div(30);
     },
