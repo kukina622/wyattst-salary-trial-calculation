@@ -1,4 +1,8 @@
-import { month_name_list, average_working_hours_per_month } from "./constant.js";
+import {
+  average_working_hours_per_month,
+  guard_average_working_hours_per_month,
+  guard_average_working_day_per_month
+} from "./constant.js";
 
 export default new Vue({
   el: "#app",
@@ -135,9 +139,21 @@ export default new Vue({
       normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
 
       //最低基本工資
-      const resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
-        .times(this.hourlyWage)
-        .add(govtMinWage);
+      let resultMinimumWage;
+
+      if (normalMonthWorkHours < average_working_hours_per_month) {
+        resultMinimumWage = new Decimal(guard_average_working_hours_per_month - average_working_hours_per_month)
+          .times(this.hourlyWage)
+          .add(govtMinWage)
+          .div(guard_average_working_day_per_month)
+          .div(10)
+          .times(normalMonthWorkHours)
+  
+      } else {
+        resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
+          .times(this.hourlyWage)
+          .add(govtMinWage)
+      }
 
       // 延長工時工資(不含全日加班)
       const totalOvertimeHour =
@@ -207,7 +223,7 @@ export default new Vue({
     },
     getGovtMinWage() {
       return localStorage.getItem("govtMinWage") ?? "";
-    }
+    },
   },
   mounted() {
     const govtMinWage = this.getGovtMinWage();

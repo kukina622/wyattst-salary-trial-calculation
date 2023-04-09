@@ -14,3 +14,7 @@ export const month_name_list = [
 ];
 
 export const average_working_hours_per_month = 174
+
+export const guard_average_working_hours_per_month = 240
+
+export const guard_average_working_day_per_month = 24
