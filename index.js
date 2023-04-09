@@ -89,7 +89,7 @@ export default new Vue({
       const totalWorkHours = parseInt(this.breakTimeCalcCondition.workHours) || 0;
       const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
 
-      for (let breakTime = 0; breakTime < totalWorkHours; breakTime++) {
+      for (let breakTime = 0; breakTime < totalWorkHours; breakTime+=0.25) {
         const { totalSalary } = this.salaryCalc({
           govtMinWage,
           holiday,
