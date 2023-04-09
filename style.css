@@ -48,7 +48,7 @@ h2 {
   font-size: 1.2rem;
 }
 .result-block .horizontal-line {
-  margin: 10px 30px;
+  margin: 10px 0;
   border-bottom: 1px solid #000;
 }
 .result-block p {
@@ -60,4 +60,9 @@ h2 {
   display: grid;
   grid-template-rows: max-content 1fr;
   height: 100%;
+}
+
+.nav-item.active {
+  background-color: #18bc9c;
+  border-radius: 5px;
 }
