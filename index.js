@@ -93,7 +93,7 @@ export default new Vue({
           totalWorkHours,
           breakTime,
         });
-        if (totalSalary <= expectSalary) {
+        if (totalSalary.comparedTo(expectSalary) <= 0) {
           this.breakTimeCalcResult.dailyBreakTime = breakTime;
           break;
         }
@@ -133,6 +133,7 @@ export default new Vue({
 
       // 超過240小時以240計
       normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
+
       //最低基本工資
       const resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
         .times(this.hourlyWage)
