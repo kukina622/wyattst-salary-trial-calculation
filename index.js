@@ -59,8 +59,8 @@ export default new Vue({
       const govtMinWage = parseInt(this.govtMinWage) || 0;
       const holiday = this.holiday;
       const workingDays = parseInt(this.salaryCalcCondition.workingDays) || 0;
-      const totalWorkHours = parseInt(this.salaryCalcCondition.workHours) || 0;
-      const breakTime = parseInt(this.salaryCalcCondition.breakTime) || 0;
+      const totalWorkHours = this.salaryCalcCondition.workHours || 0;
+      const breakTime = this.salaryCalcCondition.breakTime || 0;
 
       const {
         minimumWage,
@@ -86,10 +86,10 @@ export default new Vue({
       const govtMinWage = parseInt(this.govtMinWage) || 0;
       const holiday = this.holiday;
       const workingDays = parseInt(this.breakTimeCalcCondition.workingDays) || 0;
-      const totalWorkHours = parseInt(this.breakTimeCalcCondition.workHours) || 0;
+      const totalWorkHours = this.breakTimeCalcCondition.workHours || 0;
       const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
 
-      for (let breakTime = 0; breakTime < totalWorkHours; breakTime+=0.25) {
+      for (let breakTime = 0; breakTime < parseFloat(totalWorkHours); breakTime+=0.25) {
         const { totalSalary } = this.salaryCalc({
           govtMinWage,
           holiday,
@@ -113,7 +113,7 @@ export default new Vue({
      * @property {Decimal} hourlyWage 時薪
      */
     salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime }) {
-      const workHours = totalWorkHours - breakTime;
+      const workHours = new Decimal(totalWorkHours).sub(breakTime).toNumber();
 
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
