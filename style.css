@@ -54,7 +54,7 @@ h2 {
 .result-block p {
   display: flex;
   justify-content: center;
-  margin-top: 10px;
+  margin: 10px auto;
 }
 .result-block {
   display: grid;
