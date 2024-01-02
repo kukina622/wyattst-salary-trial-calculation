@@ -70,7 +70,7 @@
               <span class="unit">H</span>
             </div>
             <div>
-              <label>每月上班天數</label>
+              <label>每月上班天數(含國定假日)</label>
               <input type="text" v-model="salaryCalcCondition.workingDays" />
               <span class="unit">日</span>
             </div>
@@ -97,6 +97,10 @@
               <p>
                 <span class="result-title">全日加班工資</span>:
                 <span class="result-value">{{salaryCalcResult.fullTimeOvertimePay?.toString()}}</span>
+              </p>
+              <p v-if="salaryCalcCondition.containHoliday">
+                <span class="result-title">國定假日工資</span>:
+                <span class="result-value">{{salaryCalcResult.holidayPay?.toString()}}</span>
               </p>
               <div class="horizontal-line"></div>
               <p>

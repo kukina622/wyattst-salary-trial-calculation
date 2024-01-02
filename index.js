@@ -1,7 +1,7 @@
 import {
   average_working_hours_per_month,
   guard_average_working_hours_per_month,
-  guard_average_working_day_per_month
+  guard_average_working_day_per_month,
 } from "./constant.js";
 
 export default new Vue({
@@ -23,7 +23,8 @@ export default new Vue({
       hourlyWage: null,
       overtimePay_NoFullTimeOvertime: null,
       fullTimeOvertimePay: null,
-      dailyWage: null
+      dailyWage: null,
+      holidayPay: null,
     },
     breakTimeCalcCondition: {
       govtMinWage: "",
@@ -70,7 +71,8 @@ export default new Vue({
         overtimePay,
         totalSalary,
         hourlyWage,
-        dailyWage
+        dailyWage,
+        holidayPay,
       } = this.salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime });
 
       this.salaryCalcResult = {
@@ -80,7 +82,8 @@ export default new Vue({
         hourlyWage,
         overtimePay_NoFullTimeOvertime,
         fullTimeOvertimePay,
-        dailyWage
+        dailyWage,
+        holidayPay,
       };
 
       this.saveGovtMinWage();
@@ -92,7 +95,7 @@ export default new Vue({
       const totalWorkHours = this.breakTimeCalcCondition.workHours || 0;
       const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
 
-      for (let breakTime = 0; breakTime < parseFloat(totalWorkHours); breakTime+=0.25) {
+      for (let breakTime = 0; breakTime < parseFloat(totalWorkHours); breakTime += 0.25) {
         const { totalSalary } = this.salaryCalc({
           govtMinWage,
           holiday,
@@ -115,6 +118,7 @@ export default new Vue({
      * @property {Decimal} totalSalary 總工資
      * @property {Decimal} hourlyWage 時薪
      * @property {Decimal} dailyWage 日薪
+     * @property {Decimal} holidayPay 國定假日工資
      */
     salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime }) {
       const workHours = new Decimal(totalWorkHours).sub(breakTime).toNumber();
@@ -122,7 +126,7 @@ export default new Vue({
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
       // 正常工時時數
-      let normalMonthWorkHours = normalWorkHours * (workingDays + holiday);
+      let normalMonthWorkHours = normalWorkHours * (workingDays - holiday);
 
       // 加班工時時數
       const overtimeHourPerDay = workHours > 10 ? workHours - 10 : 0; //每日加班時數
@@ -146,17 +150,18 @@ export default new Vue({
       let resultMinimumWage;
 
       if (normalMonthWorkHours < average_working_hours_per_month) {
-        resultMinimumWage = new Decimal(guard_average_working_hours_per_month - average_working_hours_per_month)
+        resultMinimumWage = new Decimal(
+          guard_average_working_hours_per_month - average_working_hours_per_month
+        )
           .times(this.hourlyWage)
           .add(govtMinWage)
           .div(guard_average_working_day_per_month)
           .div(10)
-          .times(normalMonthWorkHours)
-  
+          .times(normalMonthWorkHours);
       } else {
         resultMinimumWage = new Decimal(normalMonthWorkHours - average_working_hours_per_month)
           .times(this.hourlyWage)
-          .add(govtMinWage)
+          .add(govtMinWage);
       }
 
       // 延長工時工資(不含全日加班)
@@ -208,11 +213,21 @@ export default new Vue({
           .add(fullTimeOvertimePay);
       }
 
+      // 國定假日工資
+      let holidayPay = new Decimal(0);
+
+      if (holiday > 0) {
+        holidayPay = new Decimal(govtMinWage)
+          .div(guard_average_working_hours_per_month)
+          .times(normalWorkHours)
+          .ceil();
+      }
+
       // 結果
       const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
-      const totalSalary = resultMinimumWage.add(overtimePay).ceil();
+      const totalSalary = resultMinimumWage.add(overtimePay).add(holidayPay).ceil();
       const resultHourlyWage = totalSalary.div(workingDays).div(workHours).toDecimalPlaces(3);
-      const dailyWage = totalSalary.div(workingDays).toDecimalPlaces(3)
+      const dailyWage = totalSalary.div(workingDays).toDecimalPlaces(3);
 
       return {
         minimumWage: resultMinimumWage.ceil(),
@@ -221,7 +236,8 @@ export default new Vue({
         hourlyWage: resultHourlyWage,
         overtimePay,
         totalSalary,
-        dailyWage
+        dailyWage,
+        holidayPay,
       };
     },
     saveGovtMinWage() {
