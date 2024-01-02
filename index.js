@@ -126,7 +126,7 @@ export default new Vue({
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
       // 正常工時時數
-      let normalMonthWorkHours = normalWorkHours * (workingDays - holiday);
+      let normalMonthWorkHours = normalWorkHours * (workingDays);
 
       // 加班工時時數
       const overtimeHourPerDay = workHours > 10 ? workHours - 10 : 0; //每日加班時數
@@ -217,10 +217,7 @@ export default new Vue({
       let holidayPay = new Decimal(0);
 
       if (holiday > 0) {
-        holidayPay = new Decimal(govtMinWage)
-          .div(guard_average_working_hours_per_month)
-          .times(normalWorkHours)
-          .ceil();
+        holidayPay = this.hourlyWage.times(normalWorkHours).ceil();
       }
 
       // 結果
