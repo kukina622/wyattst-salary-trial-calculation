@@ -72,7 +72,6 @@ export default new Vue({
         totalSalary,
         hourlyWage,
         dailyWage,
-        holidayPay,
       } = this.salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime });
 
       this.salaryCalcResult = {
@@ -83,7 +82,6 @@ export default new Vue({
         overtimePay_NoFullTimeOvertime,
         fullTimeOvertimePay,
         dailyWage,
-        holidayPay,
       };
 
       this.saveGovtMinWage();
@@ -123,30 +121,27 @@ export default new Vue({
     salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime }) {
       const workHours = new Decimal(totalWorkHours).sub(breakTime).toNumber();
 
+      // 每日正常工時
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
-      // 正常工時時數
-      let normalMonthWorkHours = normalWorkHours * (workingDays);
+      // 每月正常工時時數
+      let normalMonthWorkHours = normalWorkHours * workingDays;
 
-      // 加班工時時數
-      const overtimeHourPerDay = workHours > 10 ? workHours - 10 : 0; //每日加班時數
-
-      // 全日加班時數
-      // 假設每天沒加班
-      let fullTimeOvertimeHours = normalMonthWorkHours > 240 ? normalMonthWorkHours - 240 : 0;
-      let fullTimeOvertimeDays = Math.floor(fullTimeOvertimeHours / workHours);
-
-      // 假如每天有加班
-      // 全日加班 = 工時*全日加班天數
-      if (overtimeHourPerDay > 0) {
-        fullTimeOvertimeDays = (normalMonthWorkHours - 240) / 10;
-        fullTimeOvertimeHours = workHours * fullTimeOvertimeDays;
-      }
-
-      // 超過240小時以240計
+      // 每月正常工時時數-超過240小時以240計
       normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
 
-      //最低基本工資
+      //每日加班時數
+      const overtimeHourPerDay = workHours > 10 ? workHours - 10 : 0;
+
+      // 全日加班時數
+      let fullTimeOvertimeDays = workingDays - 24 < 0 ? 0 : workingDays - 24;
+
+      // 有國定假日用23天計
+      if (holiday > 0) {
+        fullTimeOvertimeDays = workingDays - 23 < 0 ? 0 : workingDays - 23;
+      }
+
+      // 最低基本工資
       let resultMinimumWage;
 
       if (normalMonthWorkHours < average_working_hours_per_month) {
@@ -165,64 +160,30 @@ export default new Vue({
       }
 
       // 延長工時工資(不含全日加班)
-      const totalOvertimeHour =
-        fullTimeOvertimeHours > 0
-          ? (workingDays - fullTimeOvertimeDays) * overtimeHourPerDay
-          : overtimeHourPerDay * workingDays;
-
-      const overtimePay_NoFullTimeOvertime = new Decimal(totalOvertimeHour)
-        .times(this.hourlyWage)
+      const overtimeHourDays_NoFullTime = workingDays - fullTimeOvertimeDays;
+      const overtimePay_NoFullTimeOvertime = new Decimal(overtimeHourPerDay)
+        .times(overtimeHourDays_NoFullTime)
         .times(4)
-        .div(3);
+        .div(3)
+        .times(this.hourlyWage);
 
       // 全日加班
       let fullTimeOvertimePay = new Decimal(0);
-
-      // 假設前一天有加班
-      if (fullTimeOvertimeHours % workHours !== 0) {
-        const first = fullTimeOvertimeHours % workHours;
-        if (first > 2) {
-          fullTimeOvertimePay = this.hourlyWage.times(4).div(3).times(2).add(fullTimeOvertimePay);
-          fullTimeOvertimePay = this.hourlyWage
-            .times(5)
-            .div(3)
-            .times(first - 2)
-            .add(fullTimeOvertimePay);
-        } else {
-          fullTimeOvertimePay = this.hourlyWage
-            .times(4)
-            .div(3)
-            .times(first)
-            .add(fullTimeOvertimePay);
-        }
-      }
-
       if (fullTimeOvertimeDays > 0) {
-        let _fullTimeOvertimePay = new Decimal(0);
+        const first = workHours > 2 ? 2 : workHours;
+        const firstPay = new Decimal(first).times(4).div(3).times(this.hourlyWage);
 
-        _fullTimeOvertimePay = this.hourlyWage.times(4).div(3).times(2).add(_fullTimeOvertimePay);
-
-        _fullTimeOvertimePay = this.hourlyWage
-          .times(5)
-          .div(3)
-          .times(workHours - 2)
-          .add(_fullTimeOvertimePay);
-
-        fullTimeOvertimePay = _fullTimeOvertimePay
-          .mul(fullTimeOvertimeDays)
-          .add(fullTimeOvertimePay);
+        const second = workHours - first;
+        let secondPay = new Decimal(0);
+        if (second > 0) {
+          secondPay = new Decimal(second).times(5).div(3).times(this.hourlyWage);
+        }
+        fullTimeOvertimePay = firstPay.add(secondPay);
       }
 
-      // 國定假日工資
-      let holidayPay = new Decimal(0);
-
-      if (holiday > 0) {
-        holidayPay = this.hourlyWage.times(normalWorkHours).ceil();
-      }
-
-      // 結果
+      // 試算
       const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
-      const totalSalary = resultMinimumWage.add(overtimePay).add(holidayPay).ceil();
+      const totalSalary = resultMinimumWage.add(overtimePay).ceil();
       const resultHourlyWage = totalSalary.div(workingDays).div(workHours).toDecimalPlaces(3);
       const dailyWage = totalSalary.div(workingDays).toDecimalPlaces(3);
 
@@ -234,7 +195,6 @@ export default new Vue({
         overtimePay,
         totalSalary,
         dailyWage,
-        holidayPay,
       };
     },
     saveGovtMinWage() {
