@@ -179,6 +179,7 @@ export default new Vue({
           secondPay = new Decimal(second).times(5).div(3).times(this.hourlyWage);
         }
         fullTimeOvertimePay = firstPay.add(secondPay);
+        fullTimeOvertimePay = fullTimeOvertimePay.times(fullTimeOvertimeDays)
       }
 
       // 試算
