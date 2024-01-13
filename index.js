@@ -125,7 +125,7 @@ export default new Vue({
       const normalWorkHours = workHours > 10 ? 10 : workHours;
 
       // 每月正常工時時數
-      let normalMonthWorkHours = normalWorkHours * workingDays;
+      let normalMonthWorkHours = normalWorkHours * (workingDays + this.holiday);
 
       // 每月正常工時時數-超過240小時以240計
       normalMonthWorkHours = normalMonthWorkHours > 240 ? 240 : normalMonthWorkHours;
