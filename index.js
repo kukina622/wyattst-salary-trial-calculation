@@ -215,6 +215,9 @@ export default new Vue({
         this.salaryCalcCondition.workHours = new URLSearchParams(window.location.search).get('workHours');
         this.salaryCalcCondition.breakTime = new URLSearchParams(window.location.search).get('breakTime');
         this.salaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
+        this.salaryCalcCondition.containHoliday = new URLSearchParams(window.location.search).get('containHoliday');
+        this.salaryCalcCondition.containHoliday = this.salaryCalcCondition.containHoliday > 0 ? true : false;
+
         let auto = new URLSearchParams(window.location.search).get('auto');
         if (auto) {
             this.onsalaryCalcSubmit();
