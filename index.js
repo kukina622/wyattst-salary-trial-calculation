@@ -144,20 +144,10 @@ export default new Vue({
             // 最低基本工資
             let resultMinimumWage;
 
-            if (normalMonthWorkHours < 174) {
-                resultMinimumWage = new Decimal(
-                    240 - 174
-                )
-                    .times(this.hourlyWage)
-                    .add(govtMinWage)
-                    .div(24)
-                    .div(10)
-                    .times(normalMonthWorkHours);
-            } else {
-                resultMinimumWage = new Decimal(normalMonthWorkHours - 174)
-                    .times(this.hourlyWage)
-                    .add(govtMinWage);
-            }
+            resultMinimumWage = new Decimal(normalMonthWorkHours - 174)
+                .times(this.hourlyWage)
+                .add(govtMinWage);
+            
 
             // 延長工時工資(不含全日加班)
             const overtimeHourDays_NoFullTime = workingDays - fullTimeOvertimeDays;
@@ -184,15 +174,15 @@ export default new Vue({
             }
 
             // 試算
-            const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay).ceil();
-            const totalSalary = resultMinimumWage.add(overtimePay).ceil();
-            const resultHourlyWage = totalSalary.div(workingDays).div(workHours).toDecimalPlaces(3);
-            const dailyWage = totalSalary.div(workingDays).toDecimalPlaces(3);
+            const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay);
+            const totalSalary = resultMinimumWage.add(overtimePay);
+            const resultHourlyWage = totalSalary.div(workingDays).div(workHours);
+            const dailyWage = totalSalary.div(workingDays);
 
             return {
-                minimumWage: resultMinimumWage.ceil(),
-                overtimePay_NoFullTimeOvertime: overtimePay_NoFullTimeOvertime.ceil(),
-                fullTimeOvertimePay: fullTimeOvertimePay.ceil(),
+                minimumWage: resultMinimumWage,
+                overtimePay_NoFullTimeOvertime: overtimePay_NoFullTimeOvertime,
+                fullTimeOvertimePay: fullTimeOvertimePay,
                 hourlyWage: resultHourlyWage,
                 overtimePay,
                 totalSalary,
