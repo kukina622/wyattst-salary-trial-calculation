@@ -10,11 +10,7 @@
     integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N" crossorigin="anonymous" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@7.2.96/css/materialdesignicons.min.css" />
 
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css" />
   <script src="//code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="//code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
-  <script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jquery-ui-monthpicker@1.0.3/jquery.ui.monthpicker.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js"
     integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
     crossorigin="anonymous"></script>
@@ -31,7 +27,7 @@
 
 <body>
   <div id="app">
-    <nav class="navbar navbar-expand	 navbar-dark bg-dark">
+    <nav class="navbar navbar-expand navbar-dark bg-dark">
       <div class="container">
         <button class="navbar-toggler" type="button" data-toggle="collapse" aria-expanded="true"
           aria-label="Toggle navigation">
@@ -46,6 +42,9 @@
             <li class="nav-item" :class="{'active': page === 2}">
               <a class="nav-link" href="#" @click="page = 2">休息時間試算</a>
             </li>
+            <li class="nav-item" :class="{'active': page === 3}">
+              <a class="nav-link" href="#" @click="page = 3">試算薪資(總工時)</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -54,7 +53,7 @@
       <div class="row justify-content-center">
         <div class="col-md-4 col-sm-6">
           <h2>條件設定</h2>
-          <form @submit.prevent="onsalaryCalcSubmit">
+          <form @submit.prevent="onSalaryCalcSubmit">
             <div>
               <label>年度基本薪資</label>
               <input type="text" v-model="salaryCalcCondition.govtMinWage" />
@@ -167,52 +166,99 @@
         </div>
       </div>
     </section>
+    <section class="container total-salary-calc" v-if="page === 3">
+      <div class="row justify-content-center">
+        <div class="col-md-5 col-sm-6">
+          <h2>條件設定</h2>
+          <form @submit.prevent="onTotalWorksHoursSalaryCalcSubmit">
+            <div>
+              <label>年度基本薪資</label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.govtMinWage" />
+            </div>
+            <div>
+              <label data-toggle="tooltip" title="請先扣除休息時間">
+                月總工作時數
+              </label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthWorkHours" />
+              <span class="unit">H</span>
+            </div>
+            <div>
+              <label data-toggle="tooltip" title="不含全日加班">
+                月總加班時數<br>(≤ {{ holiday ? 23 : 24 }}天)
+              </label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthOvertimeHours" />
+              <span class="unit">H</span>
+            </div>
+            <div 
+              class="d-flex align-items-center"
+              style="gap: 8px;"
+              v-for="(_, index) in totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours"
+            >
+              <label>單日全日加班時數<br>(&gt; {{ holiday ? 23 : 24 }} 天時數)</label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours[index]" />
+              <span class="unit">H</span>
+              <button v-if="index === 0" @click="addFullTimeOverHours" type="button" class="btn btn-outline-primary">
+                +
+              </button>
+            </div>
+            <div>
+              <label>每月上班天數</label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.workingDays" />
+              <span class="unit">日</span>
+            </div>
+            <div>
+              <input id="contain-holiday" type="checkbox" v-model="totalWorksHoursSalaryCalcCondition.containHoliday" />
+              <label for="contain-holiday">1天國定假日</label>
+            </div>
+            <button type="submit">試算</button>
+          </form>
+        </div>
+        <div class="vertical-line"></div>
+        <div class="col">
+          <div class="result-block">
+            <h2>試算結果</h2>
+            <div>
+              <p>
+                <span class="result-title">最低基本工資</span>:
+                <span class="result-value">{{ totalWorksHoursSalaryCalcResult.minimumWage?.toString() }}</span>
+              </p>
+              <p>
+                <span class="result-title">加班工時工資</span>:
+                <span class="result-value">{{totalWorksHoursSalaryCalcResult.overtimePay_NoFullTimeOvertime?.toString()}}</span>
+              </p>
+              <p>
+                <span class="result-title">全日加班工資</span>:
+                <span class="result-value">{{totalWorksHoursSalaryCalcResult.fullTimeOvertimePay?.toString()}}</span>
+              </p>
+              <div class="horizontal-line"></div>
+              <p>
+                <span class="result-title">合計</span>:
+                <span class="result-value">{{totalWorksHoursSalaryCalcResult.totalSalary?.toString()}}</span>
+              </p>
+              <p>
+                <span class="result-title">時薪</span>:
+                <span class="result-value">
+                  {{totalWorksHoursSalaryCalcResult.hourlyWage?.toString()}}
+                </span>
+              </p>
+              <p>
+                <span class="result-title">日薪</span>:
+                <span class="result-value">
+                  {{totalWorksHoursSalaryCalcResult.dailyWage?.toString()}}
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-12 mt-4">
+          <p>*月總工作時數 需先扣除休息時間再加總</p>
+          <p>*月總加班時數 需先扣除全日加班時數</p>
+        </div>
+      </div>
+    </section>
+
   </div>
   <script type="module" src="./index.js"></script>
-  <script type="module">
-    import vm from "./index.js";
-    import { month_name_list } from "./constant.js";
-    $(function () {
-      $.monthpicker.regional["zh-TW"] = {
-        closeText: "關閉",
-        prevText: "&#x3c;上個月",
-        nextText: "下個月&#x3e;",
-        currentText: "今天",
-        monthNames: month_name_list,
-        monthNamesShort: month_name_list,
-        dayNames: [
-          "星期日",
-          "星期一",
-          "星期二",
-          "星期三",
-          "星期四",
-          "星期五",
-          "星期六"
-        ],
-        dayNamesShort: ["日", "一", "二", "三", "四", "五", "六"],
-        dayNamesMin: ["日", "一", "二", "三", "四", "五", "六"],
-        weekHeader: "周",
-        dateFormat: "MM yy",
-        firstDay: 1,
-        isRTL: false,
-        showMonthAfterYear: true,
-        yearSuffix: "年"
-      };
-
-      $.monthpicker.setDefaults($.monthpicker.regional["zh-TW"]);
-
-      $("#datepicker").monthpicker({
-        changeMonth: true,
-        changeYear: false,
-        showButtonPanel: true,
-        dateFormat: "MM",
-        onSelect: function (text, inst) {
-          vm.$set(vm.condition, "monthName", text);
-        }
-      });
-      $('[data-toggle="tooltip"]').tooltip();
-    });
-  </script>
 </body>
 
 </html>

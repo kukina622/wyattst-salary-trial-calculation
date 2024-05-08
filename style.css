@@ -66,3 +66,7 @@ h2 {
   background-color: #18bc9c;
   border-radius: 5px;
 }
+
+.total-salary-calc label {
+  width: 130px;
+}
