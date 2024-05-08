@@ -144,10 +144,20 @@ export default new Vue({
             // 最低基本工資
             let resultMinimumWage;
 
-            resultMinimumWage = new Decimal(normalMonthWorkHours - 174)
-                .times(this.hourlyWage)
-                .add(govtMinWage);
-            
+            if (normalMonthWorkHours < 174) {
+                resultMinimumWage = new Decimal(
+                    240 - 174
+                )
+                    .times(this.hourlyWage)
+                    .add(govtMinWage)
+                    .div(24)
+                    .div(10)
+                    .times(normalMonthWorkHours);
+            } else {
+                resultMinimumWage = new Decimal(normalMonthWorkHours - 174)
+                    .times(this.hourlyWage)
+                    .add(govtMinWage);
+            }
 
             // 延長工時工資(不含全日加班)
             const overtimeHourDays_NoFullTime = workingDays - fullTimeOvertimeDays;
