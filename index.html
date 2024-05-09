@@ -176,10 +176,17 @@
               <input type="text" v-model="totalWorksHoursSalaryCalcCondition.govtMinWage" />
             </div>
             <div>
-              <label data-toggle="tooltip" title="請先扣除休息時間">
+              <label>
                 月總工作時數
               </label>
               <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthWorkHours" />
+              <span class="unit">H</span>
+            </div>
+            <div>
+              <label>
+                月總休息時間
+              </label>
+              <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthBreakTime" />
               <span class="unit">H</span>
             </div>
             <div>
@@ -249,10 +256,6 @@
               </p>
             </div>
           </div>
-        </div>
-        <div class="col-lg-12 mt-4">
-          <p>*月總工作時數 需先扣除休息時間再加總</p>
-          <p>*月總加班時數 需先扣除全日加班時數</p>
         </div>
       </div>
     </section>

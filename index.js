@@ -39,6 +39,7 @@ export default new Vue({
         totalWorksHoursSalaryCalcCondition: {
             govtMinWage: "",
             monthWorkHours: "",
+            monthBreakTime: "",
             monthOvertimeHours: "",
             monthFullTimeOverHours: [""],
             workingDays: "",
@@ -133,7 +134,8 @@ export default new Vue({
             const govtMinWage = parseInt(this.govtMinWage) || 0;
             const holiday = this.holiday;
             const workingDays = parseInt(this.totalWorksHoursSalaryCalcCondition.workingDays) || 0;
-            const monthWorkHours = parseInt(this.totalWorksHoursSalaryCalcCondition.monthWorkHours) || 0;
+            const monthWorkHours = parseFloat(this.totalWorksHoursSalaryCalcCondition.monthWorkHours) || 0;
+            const monthBreakTime = parseFloat(this.totalWorksHoursSalaryCalcCondition.monthBreakTime) || 0;
             const monthOvertimeHours = parseInt(this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours) || 0;
             const monthFullTimeOverHours = this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours;
 
@@ -145,7 +147,15 @@ export default new Vue({
                 totalSalary,
                 hourlyWage,
                 dailyWage,
-            } = this.salaryCalcByMonthWorkHours({govtMinWage, holiday, workingDays, monthWorkHours, monthOvertimeHours, monthFullTimeOverHours});
+            } = this.salaryCalcByMonthWorkHours({
+                govtMinWage, 
+                holiday, 
+                workingDays, 
+                monthWorkHours, 
+                monthOvertimeHours, 
+                monthBreakTime, 
+                monthFullTimeOverHours
+            });
 
             this.totalWorksHoursSalaryCalcResult = {
                 minimumWage,
@@ -259,14 +269,15 @@ export default new Vue({
          * @property {Decimal} hourlyWage 時薪
          * @property {Decimal} dailyWage 日薪
          */
-        salaryCalcByMonthWorkHours({ govtMinWage, holiday, workingDays, monthWorkHours, monthOvertimeHours, monthFullTimeOverHours = [] }) {
+        salaryCalcByMonthWorkHours({ govtMinWage, holiday, workingDays, monthWorkHours, monthOvertimeHours, monthBreakTime, monthFullTimeOverHours = [] }) {
 
-            monthWorkHours = 
-                monthWorkHours - 
-                monthOvertimeHours - 
-                monthFullTimeOverHours.reduce((acc, cur) => acc + (parseInt(cur) || 0), 0);
+            const _monthWorkHours = new Decimal(monthWorkHours)
+                                    .sub(monthOvertimeHours)
+                                    .sub(monthBreakTime)
+                                    .sub(monthFullTimeOverHours.reduce((acc, cur) => acc + (parseInt(cur) || 0), 0))
+                                    .toNumber();
 
-            let normalMonthWorkHours = monthWorkHours > 240 ? 240 : monthWorkHours;
+            let normalMonthWorkHours = _monthWorkHours > 240 ? 240 : _monthWorkHours;
             if (holiday > 0) {
                 normalMonthWorkHours += 10;
             }
@@ -290,7 +301,7 @@ export default new Vue({
             }
 
             // 延長工時時數(不含全日加班)
-            const overtimePay_NoFullTimeOvertime = new Decimal(monthOvertimeHours)
+            let overtimePay_NoFullTimeOvertime = new Decimal(monthOvertimeHours)
                 .times(4)
                 .div(3)
                 .times(this.hourlyWage);
@@ -314,10 +325,26 @@ export default new Vue({
             }
 
             // 試算
+
+            // 最低基本工資
+            resultMinimumWage = resultMinimumWage.ceil()
+
+            // 延長工時工資(不含全日加班)
+            overtimePay_NoFullTimeOvertime = overtimePay_NoFullTimeOvertime.ceil()
+
+            // 全日加班工資
+            fullTimeOvertimePay = fullTimeOvertimePay.ceil()
+
+            // 總延長工時工資
             const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay);
+
+            // 總工資
             const totalSalary = resultMinimumWage.add(overtimePay);
             const dailyWage = totalSalary.div(workingDays);
-            const hourlyWage = totalSalary.div(monthWorkHours);
+            
+            const hourlyWage = totalSalary.div(
+                new Decimal(monthWorkHours).sub(monthBreakTime)
+            );
 
             return {
                 minimumWage: resultMinimumWage.ceil(),
