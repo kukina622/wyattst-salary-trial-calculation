@@ -41,7 +41,7 @@ export default new Vue({
             monthWorkHours: "",
             monthBreakTime: "",
             monthOvertimeHours: "",
-            monthFullTimeOverHours: [""],
+            monthFullTimeOverHours: [],
             workingDays: "",
             containHoliday: false,
         },
@@ -136,7 +136,7 @@ export default new Vue({
             const workingDays = parseInt(this.totalWorksHoursSalaryCalcCondition.workingDays) || 0;
             const monthWorkHours = parseFloat(this.totalWorksHoursSalaryCalcCondition.monthWorkHours) || 0;
             const monthBreakTime = parseFloat(this.totalWorksHoursSalaryCalcCondition.monthBreakTime) || 0;
-            const monthOvertimeHours = parseInt(this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours) || 0;
+            const monthOvertimeHours = parseFloat(this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours) || 0;
             const monthFullTimeOverHours = this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours;
 
             const {
@@ -363,8 +363,27 @@ export default new Vue({
         getGovtMinWage() {
             return localStorage.getItem("govtMinWage") ?? "";
         },
-        addFullTimeOverHours() {
-            this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours.push("");
+        setTotalWorksHoursSalaryCalcMonthFullTimeOverHours() {
+            const { containHoliday, workingDays } = this.totalWorksHoursSalaryCalcCondition;
+            const _workingDays = parseInt(workingDays) || 0
+            let length = 0
+
+            if (containHoliday && _workingDays > 23) {
+                length = workingDays - 23;
+            } 
+
+            if (!containHoliday && _workingDays > 24) {
+                length = workingDays - 24;
+            }
+
+            if (length < 0) length = 0;
+            this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours = Array.from(
+                { length }, 
+                () => ""
+            );
+            this.$nextTick(() => {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
         }
     },
     mounted() {
@@ -389,6 +408,12 @@ export default new Vue({
             this.$nextTick(() => {
                 $('[data-toggle="tooltip"]').tooltip();
             });
-        }
+        },
+        "totalWorksHoursSalaryCalcCondition.workingDays": function() {
+            this.setTotalWorksHoursSalaryCalcMonthFullTimeOverHours();
+        },
+        "totalWorksHoursSalaryCalcCondition.containHoliday": function() {
+            this.setTotalWorksHoursSalaryCalcMonthFullTimeOverHours();
+        },
     }
 });

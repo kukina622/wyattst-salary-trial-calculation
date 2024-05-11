@@ -191,7 +191,7 @@
             </div>
             <div>
               <label data-toggle="tooltip" title="不含全日加班">
-                月總加班時數<br>(≤ {{ holiday ? 23 : 24 }}天)
+                {{ holiday ? 23 : 24 }}內天月總加班時數
               </label>
               <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthOvertimeHours" />
               <span class="unit">H</span>
@@ -201,12 +201,11 @@
               style="gap: 8px;"
               v-for="(_, index) in totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours"
             >
-              <label>單日全日加班時數<br>(&gt; {{ holiday ? 23 : 24 }} 天時數)</label>
+              <label data-toggle="tooltip" title="需要扣除當日休息時間">
+                單日全日加班時數<br>(&gt; {{ holiday ? 23 : 24 }} 天時數)
+              </label>
               <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours[index]" />
               <span class="unit">H</span>
-              <button v-if="index === 0" @click="addFullTimeOverHours" type="button" class="btn btn-outline-primary">
-                +
-              </button>
             </div>
             <div>
               <label>每月上班天數</label>
