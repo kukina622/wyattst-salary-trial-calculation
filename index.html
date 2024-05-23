@@ -45,6 +45,9 @@
             <li class="nav-item" :class="{'active': page === 3}">
               <a class="nav-link" href="#" @click="page = 3">試算薪資(總工時)</a>
             </li>
+            <li class="nav-item" :class="{'active': page === 4}">
+              <a class="nav-link" href="#" @click="page = 4">倒推薪資</a>
+            </li>
           </ul>
         </div>
       </div>
@@ -196,11 +199,8 @@
               <input type="text" v-model="totalWorksHoursSalaryCalcCondition.monthOvertimeHours" />
               <span class="unit">H</span>
             </div>
-            <div 
-              class="d-flex align-items-center"
-              style="gap: 8px;"
-              v-for="(_, index) in totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours"
-            >
+            <div class="d-flex align-items-center" style="gap: 8px;"
+              v-for="(_, index) in totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours">
               <label data-toggle="tooltip" title="需要扣除當日休息時間">
                 單日全日加班時數<br>(&gt; {{ holiday ? 23 : 24 }} 天時數)
               </label>
@@ -230,7 +230,8 @@
               </p>
               <p>
                 <span class="result-title">加班工時工資</span>:
-                <span class="result-value">{{totalWorksHoursSalaryCalcResult.overtimePay_NoFullTimeOvertime?.toString()}}</span>
+                <span
+                  class="result-value">{{totalWorksHoursSalaryCalcResult.overtimePay_NoFullTimeOvertime?.toString()}}</span>
               </p>
               <p>
                 <span class="result-title">全日加班工資</span>:
@@ -258,7 +259,69 @@
         </div>
       </div>
     </section>
-
+    <section class="container" v-if="page === 4">
+      <div class="row justify-content-center">
+        <div class="col-md-5 col-sm-6">
+          <h2>條件設定</h2>
+          <form @submit.prevent="onSalaryPushBackCalcSubmit">
+            <div>
+              <label>總計薪資</label>
+              <input type="text" v-model="salaryPushBackCondition.totalSalary" />
+            </div>
+            <div>
+              <label>每日工作時數</label>
+              <input type="text" v-model="salaryPushBackCondition.workHours" />
+              <span class="unit">H</span>
+            </div>
+            <div>
+              <label>上班休息時間</label>
+              <input type="text" v-model="salaryPushBackCondition.breakTime" />
+              <span class="unit">H</span>
+            </div>
+            <div>
+              <label>每月上班天數</label>
+              <input type="text" v-model="salaryPushBackCondition.workingDays" />
+              <span class="unit">日</span>
+            </div>
+            <div>
+              <input id="contain-holiday" type="checkbox" v-model="salaryPushBackCondition.containHoliday" />
+              <label for="contain-holiday">1天國定假日</label>
+            </div>
+            <button type="submit">試算</button>
+          </form>
+        </div>
+        <div class="vertical-line"></div>
+        <div class="col">
+          <div class="result-block">
+            <h2>試算結果</h2>
+            <div>
+              <p>
+                <span class="result-title">本薪</span>:
+                <span class="result-value">{{ salaryPushBackResult.salary?.toString() }}</span>
+              </p>
+              <p>
+                <span class="result-title">最低基本工資<br>(不含國定假日)</span>:
+                <span class="result-value">{{ salaryPushBackResult.minimumWage_NoHolidayPay?.toString() }}</span>
+              </p>
+              <p>
+                <span class="result-title">國定假日</span>:
+                <span class="result-value">{{ salaryPushBackResult.holidayPay?.toString() }}</span>
+              </p>
+              <p>
+                <span class="result-title">加班工時工資</span>:
+                <span class="result-value">
+                  {{salaryPushBackResult.overtimePay_NoFullTimeOvertime?.toString()}}
+                </span>
+              </p>
+              <p>
+                <span class="result-title">全日加班工資</span>:
+                <span class="result-value">{{salaryPushBackResult.fullTimeOvertimePay?.toString()}}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
   <script type="module" src="./index.js"></script>
 </body>

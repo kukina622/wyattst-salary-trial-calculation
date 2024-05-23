@@ -54,7 +54,22 @@ export default new Vue({
             fullTimeOvertimePay: null,
             dailyWage: null,
             holidayPay: null,
-        }
+        },
+        salaryPushBackCondition: {
+            totalSalary: "33499",
+            workHours: "12",
+            breakTime: "1",
+            workingDays: "20",
+            containHoliday: false,
+        },
+        salaryPushBackResult: {
+            salary: null,
+            minimumWage_NoHolidayPay: null,
+            holidayPay: null,
+            overtimePay_NoFullTimeOvertime: null,
+            fullTimeOvertimePay: null,
+        },
+
     },
     computed: {
         // 時薪
@@ -76,6 +91,8 @@ export default new Vue({
                     return this.breakTimeCalcCondition;
                 case 3:
                     return this.totalWorksHoursSalaryCalcCondition;
+                case 4:
+                    return this.salaryPushBackCondition;
             }
         },
     },
@@ -167,6 +184,29 @@ export default new Vue({
                 dailyWage,
             };
         },
+        onSalaryPushBackCalcSubmit() {
+            const totalSalary = parseInt(this.salaryPushBackCondition.totalSalary) || 0;
+            const workHours = parseFloat(this.salaryPushBackCondition.workHours) || 0;
+            const breakTime = parseFloat(this.salaryPushBackCondition.breakTime) || 0;
+            const workingDays = parseInt(this.salaryPushBackCondition.workingDays) || 0;
+            const containHoliday = this.salaryPushBackCondition.containHoliday
+            const {
+                salary,
+                minimumWage_NoHolidayPay,
+                holidayPay,
+                overtimePay_NoFullTimeOvertime,
+                fullTimeOvertimePay,
+            } = this.salaryPushBackCalc({ totalSalary, workHours, breakTime, workingDays, containHoliday});
+
+            this.salaryPushBackResult = {
+                salary,
+                minimumWage_NoHolidayPay,
+                holidayPay,
+                overtimePay_NoFullTimeOvertime,
+                fullTimeOvertimePay,
+            };
+        },
+
         /**
          * @returns {Object}
          * @property {Decimal} minimumWage 最低基本工資
@@ -356,7 +396,61 @@ export default new Vue({
                 fullTimeOvertimePay: fullTimeOvertimePay.ceil(),
             };
         },
-        
+
+        /**
+         * @returns {Object}
+         * @property {Decimal} salary 本薪
+         * @property {Decimal} minimumWage_NoHolidayPay 最低基本薪資(不含國定假日)
+         * @property {Decimal} holidayPay 國定假日工資
+         * @property {Decimal} overtimePay_NoFullTimeOvertime 延長工時工資(不含全日加班)
+         * @property {Decimal} overtimePay 總延長工時工資
+         */
+        salaryPushBackCalc({ totalSalary, workHours, breakTime, workingDays, containHoliday }) {
+            const originalWorkHours = workHours;
+
+            workHours = new Decimal(workHours).sub(breakTime).toNumber(); 
+            const holidayHour = containHoliday ? 10 : 0;
+            const normalWorkHours = workHours > 10 ? 10 : workHours;
+            const overtimeHour = workHours > 10 ? new Decimal(workHours).sub(10).toNumber() : 0;
+
+            let fullTimeOvertimeDays = workingDays > 24 ? workingDays - 24 : 0;
+            if (containHoliday) {
+                fullTimeOvertimeDays = workingDays > 23 ? workingDays - 23 : 0;
+            }
+
+            let normalMonthWorkHours = (normalWorkHours * workingDays) + holidayHour;
+            if (normalMonthWorkHours > 240) normalMonthWorkHours = 240;
+
+            const salary = new Decimal(totalSalary).times(720).div(
+                3 * normalMonthWorkHours + 198 + 4 * overtimeHour * (workingDays - fullTimeOvertimeDays) + (5 * workHours - 2) * fullTimeOvertimeDays
+            );
+            const holidayPay = new Decimal(holidayHour).times(salary.div(240));
+
+            this.salaryPushBackCondition.govtMinWage = salary.toNumber().toString();
+
+            const {
+                minimumWage,
+                overtimePay_NoFullTimeOvertime,
+                fullTimeOvertimePay,
+            } = this.salaryCalc({
+                govtMinWage: salary,
+                holiday: containHoliday ? 1 : 0,
+                workingDays,
+                totalWorkHours: originalWorkHours,
+                breakTime,
+            })
+            
+            const minimumWage_NoHolidayPay = new Decimal(minimumWage).sub(holidayPay);
+
+            return {
+                salary: salary.ceil(),
+                minimumWage_NoHolidayPay: minimumWage_NoHolidayPay.ceil(),
+                holidayPay: holidayPay.ceil(),
+                overtimePay_NoFullTimeOvertime: overtimePay_NoFullTimeOvertime.ceil(),
+                fullTimeOvertimePay: fullTimeOvertimePay.ceil(),
+            }
+        },
+
         saveGovtMinWage() {
             localStorage.setItem("govtMinWage", this.govtMinWage);
         },
