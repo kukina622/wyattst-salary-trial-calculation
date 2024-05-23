@@ -56,11 +56,11 @@ export default new Vue({
             holidayPay: null,
         },
         salaryPushBackCondition: {
-            totalSalary: "33499",
-            workHours: "12",
-            breakTime: "1",
-            workingDays: "20",
-            containHoliday: false,
+            totalSalary: null,
+            workHours: null,
+            breakTime: null,
+            workingDays: null,
+            containHoliday: true,
         },
         salaryPushBackResult: {
             salary: null,
