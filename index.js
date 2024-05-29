@@ -485,7 +485,7 @@ export default new Vue({
         this.breakTimeCalcCondition.govtMinWage = govtMinWage;
 
         //this.salaryCalcCondition.govtMinWage = govtMinWage;
-        this.page = new URLSearchParams(window.location.search).get('page');
+        this.page = parseInt(new URLSearchParams(window.location.search).get('page'));
         this.totalWorksHoursSalaryCalcCondition.govtMinWage = new URLSearchParams(window.location.search).get('govtMinWage');
         this.totalWorksHoursSalaryCalcCondition.monthWorkHours = new URLSearchParams(window.location.search).get('monthWorkHours');
         this.totalWorksHoursSalaryCalcCondition.monthBreakTime = new URLSearchParams(window.location.search).get('monthBreakTime');
