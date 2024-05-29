@@ -485,16 +485,18 @@ export default new Vue({
         this.breakTimeCalcCondition.govtMinWage = govtMinWage;
 
         //this.salaryCalcCondition.govtMinWage = govtMinWage;
-        this.salaryCalcCondition.govtMinWage = new URLSearchParams(window.location.search).get('govtMinWage');
-        this.salaryCalcCondition.workHours = new URLSearchParams(window.location.search).get('workHours');
-        this.salaryCalcCondition.breakTime = new URLSearchParams(window.location.search).get('breakTime');
-        this.salaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
-        this.salaryCalcCondition.containHoliday = new URLSearchParams(window.location.search).get('containHoliday');
-        this.salaryCalcCondition.containHoliday = this.salaryCalcCondition.containHoliday > 0 ? true : false;
-
+        this.page = new URLSearchParams(window.location.search).get('page');
+        this.totalWorksHoursSalaryCalcCondition.govtMinWage = new URLSearchParams(window.location.search).get('govtMinWage');
+        this.totalWorksHoursSalaryCalcCondition.monthWorkHours = new URLSearchParams(window.location.search).get('monthWorkHours');
+        this.totalWorksHoursSalaryCalcCondition.monthBreakTime = new URLSearchParams(window.location.search).get('monthBreakTime');
+        this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours = new URLSearchParams(window.location.search).get('monthOvertimeHours');
+        this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours[0] = new URLSearchParams(window.location.search).get('monthFullTimeOverHours');
+        this.totalWorksHoursSalaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
+        this.totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition = new URLSearchParams(window.location.search).get('containHoliday');
+        this.totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition = totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition > 0 ? true : false;
         let auto = new URLSearchParams(window.location.search).get('auto');
         if (auto) {
-            this.onSalaryCalcSubmit();
+            this.onTotalWorksHoursSalaryCalcSubmit();
         }
     },
     watch: {
