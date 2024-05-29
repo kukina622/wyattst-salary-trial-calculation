@@ -492,8 +492,8 @@ export default new Vue({
         this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours = new URLSearchParams(window.location.search).get('monthOvertimeHours');
         this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours[0] = new URLSearchParams(window.location.search).get('monthFullTimeOverHours');
         this.totalWorksHoursSalaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
-        this.totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition = new URLSearchParams(window.location.search).get('containHoliday');
-        this.totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition = totalWorksHoursSalaryCalcCondition.totalWorksHoursSalaryCalcCondition > 0 ? true : false;
+        this.totalWorksHoursSalaryCalcCondition.containHoliday = new URLSearchParams(window.location.search).get('containHoliday');
+        this.totalWorksHoursSalaryCalcCondition.containHoliday = totalWorksHoursSalaryCalcCondition.containHoliday > 0 ? true : false;
         let auto = new URLSearchParams(window.location.search).get('auto');
         if (auto) {
             this.onTotalWorksHoursSalaryCalcSubmit();
