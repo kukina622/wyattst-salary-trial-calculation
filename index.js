@@ -478,6 +478,10 @@ export default new Vue({
             this.$nextTick(() => {
                 $('[data-toggle="tooltip"]').tooltip();
             });
+            let auto = new URLSearchParams(window.location.search).get('auto');
+            if (auto) {
+                this.onTotalWorksHoursSalaryCalcSubmit();
+            } 
         }
     },
     mounted() {
@@ -494,10 +498,6 @@ export default new Vue({
         this.totalWorksHoursSalaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
         this.totalWorksHoursSalaryCalcCondition.containHoliday = new URLSearchParams(window.location.search).get('containHoliday');
         this.totalWorksHoursSalaryCalcCondition.containHoliday = this.totalWorksHoursSalaryCalcCondition.containHoliday > 0 ? true : false;
-        let auto = new URLSearchParams(window.location.search).get('auto');
-        if (auto) {
-            this.onTotalWorksHoursSalaryCalcSubmit();
-        }
     },
     watch: {
         page() {
