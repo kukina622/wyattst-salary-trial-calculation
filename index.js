@@ -473,7 +473,7 @@ export default new Vue({
             if (length < 0) length = 0;
             this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours = Array.from(
                 { length }, 
-                () => ""
+                () => new URLSearchParams(window.location.search).get('monthFullTimeOverHours')
             );
             this.$nextTick(() => {
                 $('[data-toggle="tooltip"]').tooltip();
@@ -490,7 +490,7 @@ export default new Vue({
         this.totalWorksHoursSalaryCalcCondition.monthWorkHours = new URLSearchParams(window.location.search).get('monthWorkHours');
         this.totalWorksHoursSalaryCalcCondition.monthBreakTime = new URLSearchParams(window.location.search).get('monthBreakTime');
         this.totalWorksHoursSalaryCalcCondition.monthOvertimeHours = new URLSearchParams(window.location.search).get('monthOvertimeHours');
-        this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours = new URLSearchParams(window.location.search).get('monthFullTimeOverHours');
+        // this.totalWorksHoursSalaryCalcCondition.monthFullTimeOverHours = new URLSearchParams(window.location.search).get('monthFullTimeOverHours');
         this.totalWorksHoursSalaryCalcCondition.workingDays = new URLSearchParams(window.location.search).get('workingDays');
         this.totalWorksHoursSalaryCalcCondition.containHoliday = new URLSearchParams(window.location.search).get('containHoliday');
         this.totalWorksHoursSalaryCalcCondition.containHoliday = this.totalWorksHoursSalaryCalcCondition.containHoliday > 0 ? true : false;
