@@ -35,6 +35,7 @@ export default new Vue({
         },
         breakTimeCalcResult: {
             dailyBreakTime: "",
+            salary: "",
         },
         totalWorksHoursSalaryCalcCondition: {
             govtMinWage: "",
@@ -133,7 +134,7 @@ export default new Vue({
             const totalWorkHours = this.breakTimeCalcCondition.workHours || 0;
             const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
 
-            for (let breakTime = 0; breakTime < parseFloat(totalWorkHours); breakTime += 0.25) {
+            for (let breakTime = new Decimal(0); breakTime.comparedTo(totalWorkHours) <= 0; breakTime = breakTime.add(0.01)) {
                 const { totalSalary } = this.salaryCalc({
                     govtMinWage,
                     holiday,
@@ -143,6 +144,7 @@ export default new Vue({
                 });
                 if (totalSalary.comparedTo(expectSalary) <= 0) {
                     this.breakTimeCalcResult.dailyBreakTime = breakTime;
+                    this.breakTimeCalcResult.salary = totalSalary.toDecimalPlaces(3);
                     break;
                 }
             }
