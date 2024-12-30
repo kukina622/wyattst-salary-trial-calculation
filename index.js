@@ -139,7 +139,7 @@ export default new Vue({
             const totalWorkHours = this.breakTimeCalcCondition.workHours || 0;
             const expectSalary = parseInt(this.breakTimeCalcCondition.expectSalary) || 0;
 
-            for (let breakTime = new Decimal(0); breakTime.comparedTo(totalWorkHours) <= 0; breakTime = breakTime.add(0.01)) {
+            for (let breakTime = new Decimal(0); breakTime.comparedTo(totalWorkHours) <= 0; breakTime = breakTime.add(0.1667)) {
                 const { totalSalary } = this.salaryCalc({
                     govtMinWage,
                     holiday,
@@ -217,6 +217,7 @@ export default new Vue({
         },
 
         /**
+         * 計算薪資
          * @returns {Object}
          * @property {Decimal} minimumWage 最低基本工資
          * @property {Decimal} overtimePay_NoFullTimeOvertime 延長工時工資(不含全日加班)
@@ -315,6 +316,7 @@ export default new Vue({
         },
 
         /**
+         * 依照月工時計算薪資
          * @returns {Object}
          * @property {Decimal} minimumWage 最低基本工資
          * @property {Decimal} overtimePay_NoFullTimeOvertime 延長工時工資(不含全日加班)
@@ -412,6 +414,7 @@ export default new Vue({
         },
 
         /**
+         * 回推薪資
          * @returns {Object}
          * @property {Decimal} salary 本薪
          * @property {Decimal} minimumWage_NoHolidayPay 最低基本薪資(不含國定假日)
@@ -436,9 +439,12 @@ export default new Vue({
             let normalMonthWorkHours = (normalWorkHours * workingDays) + holidayHour;
             if (normalMonthWorkHours > 240) normalMonthWorkHours = 240;
 
+            // 提出共用除數
             const divisor = 3 * normalMonthWorkHours + 198 + 4 * overtimeHour * (workingDays - fullTimeOvertimeDays) + (5 * workHours - 2) * fullTimeOvertimeDays
 
             // 需要先倒推特休工資
+            // 由 https://github.com/kukina622/wyattst-salary-trial-calculation/blob/7edcbda3f9773e828934025fcd8eaae24f16b5b0/index.js#L426
+            // 加上公式推導得出
             const annualLeavePay = new Decimal(3).times(normalWorkHours).times(totalSalary).div(
                 new Decimal(3).times(normalWorkHours).add(divisor)
             );
@@ -506,6 +512,13 @@ export default new Vue({
             if (auto) {
                 this.onTotalWorksHoursSalaryCalcSubmit();
             } 
+        },
+        formatToTime(value) {
+            if (!value) return
+            const decimalValue = new Decimal(value);
+            const hours = decimalValue.floor(); // 取整數部分作為小時
+            const minutes = decimalValue.minus(hours).times(60).toFixed(0); // 計算分鐘部分
+            return `${hours} 小時 ${minutes} 分鐘`;
         }
     },
     mounted() {

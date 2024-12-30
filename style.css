@@ -70,3 +70,7 @@ h2 {
 .total-salary-calc label {
   width: 170px;
 }
+
+.break-time-calc .result-value {
+  width: 9rem
+}
