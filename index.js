@@ -25,6 +25,7 @@ export default new Vue({
             fullTimeOvertimePay: null,
             dailyWage: null,
             holidayPay: null,
+            annualLeavePay: null,
         },
         breakTimeCalcCondition: {
             govtMinWage: "",
@@ -57,6 +58,7 @@ export default new Vue({
             holidayPay: null,
         },
         salaryPushBackCondition: {
+            govtMinWage: 0,
             totalSalary: null,
             workHours: null,
             breakTime: null,
@@ -69,6 +71,7 @@ export default new Vue({
             holidayPay: null,
             overtimePay_NoFullTimeOvertime: null,
             fullTimeOvertimePay: null,
+            annualLeavePay: null,
         },
 
     },
@@ -113,6 +116,7 @@ export default new Vue({
                 totalSalary,
                 hourlyWage,
                 dailyWage,
+                annualLeavePay
             } = this.salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime });
 
             this.salaryCalcResult = {
@@ -123,6 +127,7 @@ export default new Vue({
                 overtimePay_NoFullTimeOvertime,
                 fullTimeOvertimePay,
                 dailyWage,
+                annualLeavePay
             };
 
             this.saveGovtMinWage();
@@ -198,6 +203,7 @@ export default new Vue({
                 holidayPay,
                 overtimePay_NoFullTimeOvertime,
                 fullTimeOvertimePay,
+                annualLeavePay
             } = this.salaryPushBackCalc({ totalSalary, workHours, breakTime, workingDays, containHoliday});
 
             this.salaryPushBackResult = {
@@ -206,6 +212,7 @@ export default new Vue({
                 holidayPay,
                 overtimePay_NoFullTimeOvertime,
                 fullTimeOvertimePay,
+                annualLeavePay
             };
         },
 
@@ -219,6 +226,7 @@ export default new Vue({
          * @property {Decimal} hourlyWage 時薪
          * @property {Decimal} dailyWage 日薪
          * @property {Decimal} holidayPay 國定假日工資
+         * @property {Decimal} annualLeavePay 特休工資
          */
         salaryCalc({ govtMinWage, holiday, workingDays, totalWorkHours, breakTime }) {
             const workHours = new Decimal(totalWorkHours).sub(breakTime).toNumber();
@@ -285,9 +293,12 @@ export default new Vue({
                 fullTimeOvertimePay = fullTimeOvertimePay.times(fullTimeOvertimeDays)
             }
 
+            // 一日特休工資
+            const annualLeavePay = this.hourlyWage.times(normalWorkHours);
+
             // 試算
             const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay);
-            const totalSalary = resultMinimumWage.add(overtimePay);
+            const totalSalary = resultMinimumWage.add(overtimePay).add(annualLeavePay);
             const resultHourlyWage = totalSalary.div(workingDays).div(workHours);
             const dailyWage = totalSalary.div(workingDays);
 
@@ -299,6 +310,7 @@ export default new Vue({
                 overtimePay: overtimePay.toDecimalPlaces(3),
                 totalSalary: totalSalary.toDecimalPlaces(3),
                 dailyWage: dailyWage.toDecimalPlaces(3),
+                annualLeavePay: annualLeavePay.toDecimalPlaces(3),
             };
         },
 
@@ -406,6 +418,7 @@ export default new Vue({
          * @property {Decimal} holidayPay 國定假日工資
          * @property {Decimal} overtimePay_NoFullTimeOvertime 延長工時工資(不含全日加班)
          * @property {Decimal} overtimePay 總延長工時工資
+         * @property {Decimal} annualLeavePay 一日特休工資
          */
         salaryPushBackCalc({ totalSalary, workHours, breakTime, workingDays, containHoliday }) {
             const originalWorkHours = workHours;
@@ -423,9 +436,17 @@ export default new Vue({
             let normalMonthWorkHours = (normalWorkHours * workingDays) + holidayHour;
             if (normalMonthWorkHours > 240) normalMonthWorkHours = 240;
 
-            const salary = new Decimal(totalSalary).times(720).div(
-                3 * normalMonthWorkHours + 198 + 4 * overtimeHour * (workingDays - fullTimeOvertimeDays) + (5 * workHours - 2) * fullTimeOvertimeDays
+            const divisor = 3 * normalMonthWorkHours + 198 + 4 * overtimeHour * (workingDays - fullTimeOvertimeDays) + (5 * workHours - 2) * fullTimeOvertimeDays
+
+            // 需要先倒推特休工資
+            const annualLeavePay = new Decimal(3).times(normalWorkHours).times(totalSalary).div(
+                new Decimal(3).times(normalWorkHours).add(divisor)
             );
+
+            const totalSalaryWithoutAnnualLeave = new Decimal(totalSalary).sub(annualLeavePay);
+
+            const salary = new Decimal(totalSalaryWithoutAnnualLeave).times(720).div(divisor);
+
             const holidayPay = new Decimal(holidayHour).times(salary.div(240));
 
             this.salaryPushBackCondition.govtMinWage = salary.toNumber().toString();
@@ -450,6 +471,7 @@ export default new Vue({
                 holidayPay: holidayPay.ceil(),
                 overtimePay_NoFullTimeOvertime: overtimePay_NoFullTimeOvertime.ceil(),
                 fullTimeOvertimePay: fullTimeOvertimePay.ceil(),
+                annualLeavePay: annualLeavePay.ceil(),
             }
         },
 
