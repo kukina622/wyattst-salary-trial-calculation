@@ -224,6 +224,7 @@ export default new Vue({
          * @property {Decimal} fullTimeOvertimePay 全日加班工資
          * @property {Decimal} overtimePay 總延長工時工資
          * @property {Decimal} totalSalary 總工資
+         * @property {Decimal} totalSalaryWithAnnualLeave 總工資 + 一日特休工資
          * @property {Decimal} hourlyWage 時薪
          * @property {Decimal} dailyWage 日薪
          * @property {Decimal} holidayPay 國定假日工資
@@ -299,9 +300,10 @@ export default new Vue({
 
             // 試算
             const overtimePay = overtimePay_NoFullTimeOvertime.add(fullTimeOvertimePay);
-            const totalSalary = resultMinimumWage.add(overtimePay).add(annualLeavePay);
+            const totalSalary = resultMinimumWage.add(overtimePay);
             const resultHourlyWage = totalSalary.div(workingDays).div(workHours);
             const dailyWage = totalSalary.div(workingDays);
+            const totalSalaryWithAnnualLeave = totalSalary.add(annualLeavePay);
 
             return {
                 minimumWage: resultMinimumWage.toDecimalPlaces(3),
@@ -312,6 +314,7 @@ export default new Vue({
                 totalSalary: totalSalary.toDecimalPlaces(3),
                 dailyWage: dailyWage.toDecimalPlaces(3),
                 annualLeavePay: annualLeavePay.toDecimalPlaces(3),
+                totalSalaryWithAnnualLeave: totalSalaryWithAnnualLeave.toDecimalPlaces(3),
             };
         },
 
@@ -451,6 +454,8 @@ export default new Vue({
 
             const totalSalaryWithoutAnnualLeave = new Decimal(totalSalary).sub(annualLeavePay);
 
+            // 本薪
+            // 基本等於最低基本薪資
             const salary = new Decimal(totalSalaryWithoutAnnualLeave).times(720).div(divisor);
 
             const holidayPay = new Decimal(holidayHour).times(salary.div(240));
