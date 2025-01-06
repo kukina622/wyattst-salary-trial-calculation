@@ -445,18 +445,9 @@ export default new Vue({
             // 提出共用除數
             const divisor = 3 * normalMonthWorkHours + 198 + 4 * overtimeHour * (workingDays - fullTimeOvertimeDays) + (5 * workHours - 2) * fullTimeOvertimeDays
 
-            // 需要先倒推特休工資
-            // 由 https://github.com/kukina622/wyattst-salary-trial-calculation/blob/7edcbda3f9773e828934025fcd8eaae24f16b5b0/index.js#L426
-            // 加上公式推導得出
-            const annualLeavePay = new Decimal(3).times(normalWorkHours).times(totalSalary).div(
-                new Decimal(3).times(normalWorkHours).add(divisor)
-            );
-
-            const totalSalaryWithoutAnnualLeave = new Decimal(totalSalary).sub(annualLeavePay);
-
             // 本薪
             // 基本等於最低基本薪資
-            const salary = new Decimal(totalSalaryWithoutAnnualLeave).times(720).div(divisor);
+            const salary = new Decimal(totalSalary).times(720).div(divisor);
 
             const holidayPay = new Decimal(holidayHour).times(salary.div(240));
 
@@ -466,6 +457,7 @@ export default new Vue({
                 minimumWage,
                 overtimePay_NoFullTimeOvertime,
                 fullTimeOvertimePay,
+                annualLeavePay
             } = this.salaryCalc({
                 govtMinWage: salary,
                 holiday: containHoliday ? 1 : 0,
